@@ -29,9 +29,6 @@ export default function RootLayout({ children }) {
               <SignedIn>
                 <UserButton />
               </SignedIn>
-              {/* <SignInButton>
-                <button>Sign in with Clerk</button>
-              </SignInButton> */}
             </header>
             <main className="mian-container">{children}</main>
           </Providers>
