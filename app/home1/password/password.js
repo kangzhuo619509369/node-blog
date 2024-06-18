@@ -1,4 +1,5 @@
 "use client";
+import { useAuth } from "@clerk/nextjs";
 import {
   Button,
   Input,
@@ -18,11 +19,15 @@ import {
   Checkbox,
   Link,
   Pagination,
+  Select,
+  SelectItem,
+  Chip,
 } from "@nextui-org/react";
 import React from "react";
 import "./password.css";
 import { EditIcon } from "./EditIcon";
 import { DeleteIcon } from "./DeleteIcon";
+import { AddPassword,GetList } from "../../api/passwordManage.js";
 const rows = [
   {
     key: "1",
@@ -32,7 +37,23 @@ const rows = [
     password: "Active",
     link: "Active",
     edit: "Active",
+    tag: "ipmortant",
   },
+];
+const animals = [
+  { key: "cat", label: "Cat" },
+  { key: "dog", label: "Dog" },
+  { key: "elephant", label: "Elephant" },
+  { key: "lion", label: "Lion" },
+  { key: "tiger", label: "Tiger" },
+  { key: "giraffe", label: "Giraffe" },
+  { key: "dolphin", label: "Dolphin" },
+  { key: "penguin", label: "Penguin" },
+  { key: "zebra", label: "Zebra" },
+  { key: "shark", label: "Shark" },
+  { key: "whale", label: "Whale" },
+  { key: "otter", label: "Otter" },
+  { key: "crocodile", label: "Crocodile" },
 ];
 
 const columns = [
@@ -57,17 +78,23 @@ const columns = [
     label: "link",
   },
   {
+    key: "tag",
+    label: "tag",
+  },
+  {
     key: "edit",
     label: "edit",
   },
 ];
 
 export default function password() {
+  const [state, setState] = React.useState("edit");
   const [webSite, setWebSite] = React.useState("");
   const [webSiteAlias, setWebSiteAlias] = React.useState("");
   const [account, setAccount] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [currentRecord, setCurrentRecord] = React.useState("");
+  const [tag, setTag] = React.useState("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [page, setPage] = React.useState(1);
   const rowsPerPage = 4;
@@ -80,6 +107,7 @@ export default function password() {
       link: "Active",
       edit: "Active",
       key: index,
+      tag: index + "import",
     };
   });
   const pages = Math.ceil(users.length / rowsPerPage);
@@ -90,8 +118,19 @@ export default function password() {
 
     return users.slice(start, end);
   }, [page, users]);
-  function searchList() {}
+  function searchList() {
+    console.log('search')
+    GetList().then(res=>{
+      console.log(res)
+    })
+  }
   // let currentRecord = {};
+  const handleSelectionChange = (e) => {
+    setTag(e.target.value);
+  };
+
+  const { isLoaded, userId, sessionId, getToken } = useAuth();
+
   return (
     <div className="password-container">
       <header>
@@ -124,13 +163,35 @@ export default function password() {
             value={password}
             onValueChange={setPassword}
           />
+          <Select
+            items={animals}
+            label="Tag"
+            placeholder="Select on tag"
+            className="max-w-xs"
+            onChange={handleSelectionChange}
+          >
+            {(animal) => <SelectItem>{animal.label}</SelectItem>}
+          </Select>
         </div>
         <div>
           <Button
             radius="full"
             color="primary"
             style={{ marginRight: "8px" }}
-            onClick={searchList}
+            onClick={() => {
+              setCurrentRecord({
+                webSite: "",
+                webSiteAlias: "",
+                account: "",
+                password: "",
+                link: "",
+                edit: "",
+                key: "",
+                tag: "",
+              });
+              setState("add");
+              onOpenChange();
+            }}
           >
             添加
           </Button>
@@ -181,6 +242,7 @@ export default function password() {
                           style={{ marginRight: "8px" }}
                           onClick={() => {
                             setCurrentRecord(item);
+                            setState("edit");
                             console.log(currentRecord);
                             onOpen();
                           }}
@@ -192,6 +254,10 @@ export default function password() {
                           }}
                         />
                       </div>
+                    ) : columnKey == "tag" ? (
+                      <Chip color="success">
+                        {getKeyValue(item, columnKey)}
+                      </Chip>
                     ) : (
                       getKeyValue(item, columnKey)
                     )}
@@ -206,7 +272,7 @@ export default function password() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">edit</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">{state}</ModalHeader>
               <ModalBody>
                 <Input
                   className="input"
@@ -244,6 +310,23 @@ export default function password() {
                     setCurrentRecord({ ...currentRecord, password: e })
                   }
                 />
+                <Input
+                  color="warning"
+                  className="input"
+                  label="link"
+                  value={currentRecord.link}
+                  onValueChange={(e) =>
+                    setCurrentRecord({ ...currentRecord, link: e })
+                  }
+                />
+                <Input
+                  className="input"
+                  label="tag"
+                  value={currentRecord.tag}
+                  onValueChange={(e) =>
+                    setCurrentRecord({ ...currentRecord, tag: e })
+                  }
+                />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="flat" onPress={onClose}>
@@ -251,8 +334,16 @@ export default function password() {
                 </Button>
                 <Button
                   color="primary"
-                  onPress={() => {
-                    console.log(currentRecord);
+                  onPress={async () => {
+                    if (state == "add") {
+                      console.log("loading");
+                      console.log({ id: userId, ...currentRecord });
+                      AddPassword({ id: userId, ...currentRecord }).then(
+                        (res) => {
+                          console.log(res);
+                        }
+                      );
+                    }
                     onClose();
                   }}
                 >
