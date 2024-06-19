@@ -4,7 +4,6 @@ import { nanoid } from "nanoid";
 export async function AddUser(name) {
   try {
     const isAdd = await sql`SELECT * FROM Users WHERE Name = ${name};`;
-    console.log("isdddddd", isAdd);
     if (isAdd.rowCount == 0) {
       await sql`INSERT INTO Users(Name, User_id) VALUES (${name}, ${nanoid()});`;
     }

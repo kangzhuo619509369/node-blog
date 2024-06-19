@@ -1,6 +1,8 @@
 import "./home.css";
 import Link from "next/link";
 import Password from "./password/password";
+// import { GetList } from "../api/passwordManage";
+
 export default function Home1() {
   return (
     <div className="container1">

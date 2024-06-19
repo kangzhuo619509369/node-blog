@@ -1,4 +1,5 @@
 "use client";
+// "use server"
 import { useAuth } from "@clerk/nextjs";
 import {
   Button,
@@ -87,7 +88,7 @@ const columns = [
   },
 ];
 
-export default function password() {
+export default function password(  ) {
   const [state, setState] = React.useState("edit");
   const [webSite, setWebSite] = React.useState("");
   const [webSiteAlias, setWebSiteAlias] = React.useState("");
